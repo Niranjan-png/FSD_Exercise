@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f4f7ff, #e3ecff);
+            margin: 0;
+            padding: 30px 20px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #1d4ed8;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #f8fafc;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+            color: #475569;
+            font-size: 16px;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        .budget-box {
+            margin-bottom: 25px;
+            background: #f8fafc;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #dbeafe;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #22c55e, #84cc16);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .expense-list {
+            margin-top: 20px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+        }
+
+        .expense-item span {
+            font-weight: 600;
+        }
+
+        .expense-item strong {
+            color: #b91c1c;
+        }
+
+        @media (max-width: 600px) {
+            .summary,
+            form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Expense Tracker</h1>
+
+        <div class="summary">
+            <div class="card">
+                <h3>Total Budget</h3>
+                <p id="totalBudget">$0</p>
+            </div>
+            <div class="card">
+                <h3>Total Spent</h3>
+                <p id="totalSpent">$0</p>
+            </div>
+            <div class="card">
+                <h3>Remaining</h3>
+                <p id="remainingBudget">$0</p>
+            </div>
+        </div>
+
+        <div class="budget-box">
+            <div class="budget-header">
+                <span>Monthly Progress</span>
+                <span id="progressLabel">0%</span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <form id="expenseForm">
+            <div class="full-width">
+                <label for="title">Expense Title</label>
+                <input type="text" id="title" placeholder="e.g. Groceries" required />
+            </div>
+
+            <div>
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" min="1" step="0.01" placeholder="0.00" required />
+            </div>
+
+            <div>
+                <label for="category">Category</label>
+                <select id="category" required>
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Bills">Bills</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="full-width">
+                <button type="submit">Add Expense</button>
+            </div>
+        </form>
+
+        <div class="expense-list">
+            <h2>Recent Expenses</h2>
+            <div id="expensesList"></div>
+        </div>
+    </div>
+
+    <script>
+        const budget = 2000;
+        let totalSpent = 0;
+        let expenses = [];
+
+        const totalBudgetEl = document.getElementById('totalBudget');
+        const totalSpentEl = document.getElementById('totalSpent');
+        const remainingBudgetEl = document.getElementById('remainingBudget');
+        const progressBar = document.getElementById('progressBar');
+        const progressLabel = document.getElementById('progressLabel');
+        const expenseForm = document.getElementById('expenseForm');
+        const expensesList = document.getElementById('expensesList');
+
+        function updateSummary() {
+            const remaining = budget - totalSpent;
+            const percentage = Math.min((totalSpent / budget) * 100, 100);
+
+            totalBudgetEl.textContent = `$${budget.toFixed(2)}`;
+            totalSpentEl.textContent = `$${totalSpent.toFixed(2)}`;
+            remainingBudgetEl.textContent = `$${remaining.toFixed(2)}`;
+
+            progressBar.style.width = `${percentage}%`;
+            progressLabel.textContent = `${Math.round(percentage)}%`;
+
+            if (percentage > 80) {
+                progressBar.style.background = 'linear-gradient(90deg, #ef4444, #f97316)';
+            } else if (percentage > 50) {
+                progressBar.style.background = 'linear-gradient(90deg, #f59e0b, #facc15)';
+            } else {
+                progressBar.style.background = 'linear-gradient(90deg, #22c55e, #84cc16)';
+            }
+        }
+
+        function renderExpenses() {
+            expensesList.innerHTML = '';
+
+            if (expenses.length === 0) {
+                expensesList.innerHTML = '<p>No expenses added yet.</p>';
+                return;
+            }
+
+            expenses.forEach((item) => {
+                const row = document.createElement('div');
+                row.className = 'expense-item';
+                row.innerHTML = `
+                    <span>${item.title} (${item.category})</span>
+                    <strong>$${item.amount.toFixed(2)}</strong>
+                `;
+                expensesList.appendChild(row);
+            });
+        }
+
+        expenseForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const title = document.getElementById('title').value.trim();
+            const amount = Number(document.getElementById('amount').value);
+            const category = document.getElementById('category').value;
+
+            if (!title || amount <= 0) {
+                alert('Please enter a valid expense title and amount.');
+                return;
+            }
+
+            expenses.push({ title, amount, category });
+            totalSpent += amount;
+
+            document.getElementById('expenseForm').reset();
+            updateSummary();
+            renderExpenses();
+        });
+
+        updateSummary();
+        renderExpenses();
+    </script>
+</body>
+</html>
