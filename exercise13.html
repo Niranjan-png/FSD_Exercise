@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Array Operations</title>
+
+    
+</head>
+
+<body>
+
+    <h1>Array Operations</h1>
+
+    <button onclick="calculate()">
+        Calculate
+    </button>
+
+    <div id="result"></div>
+
+    <script>
+
+        function calculate() {
+
+            let numbers = [25, 10, 45, 67, 12];
+
+            let sum = 0;
+            let largest = numbers[0];
+            let smallest = numbers[0];
+
+            for (let i = 0; i < numbers.length; i++) {
+
+                sum = sum + numbers[i];
+
+                if (numbers[i] > largest) {
+                    largest = numbers[i];
+                }
+
+                if (numbers[i] < smallest) {
+                    smallest = numbers[i];
+                }
+            }
+
+            let average = sum / numbers.length;
+
+            document.getElementById("result").innerHTML =
+                "Numbers: " + numbers + "<br>" +
+                "Sum: " + sum + "<br>" +
+                "Largest: " + largest + "<br>" +
+                "Smallest: " + smallest + "<br>" +
+                "Average: " + average;
+        }
+
+    </script>
+
+</body>
+</html>
