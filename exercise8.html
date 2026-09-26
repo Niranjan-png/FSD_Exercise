@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <title>Grade Calculator </title>
+    <div class="box">
+        <h1>
+            Grade Calculation
+        </h1>
+        <input type="number" id="marks" placeholder="Enter marks">
+        <br>
+        <button onclick="calculateGrade()">
+            Calculate Grade
+        </button>
+        <p id="result"></p>
+
+
+    </div>
+
+
+</head>
+<body>
+    
+</body>
+</html>
+<script>
+    function calculateGrade(){
+        let marks = Number(document.getElementById("marks").value);
+        let grade;
+        if(marks < 0 || marks > 100){
+            document.getElementById("result").innerHTML = "Please enter marks between 0 and 100.";
+            return;
+        }
+        if(marks >= 90){
+            grade = "A+";
+        }
+        else if(marks >= 80){
+            grade = "A";
+        }
+        else if(marks >= 70){
+            grade = "B";
+        }
+        else if(marks >= 60){
+            grade = "C";
+        }
+        else if(marks >= 50){
+            grade = "D";
+        }
+        else{
+            grade = "F";
+        }
+        document.getElementById("result").innerHTML = 
+                "Marks: " + marks + "<br>" +
+                "Grade: " + grade;
+
+        
+
+    }
+</script>
