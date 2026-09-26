@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <title>Submit Your Application</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #eef4ff, #dce9ff);
+            margin: 0;
+            padding: 40px 20px;
+            color: #111e30;
+        }
+
+        .form-container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #123d7a;
+            margin-bottom: 10px;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #4b5563;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input, select, textarea, button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .checkbox-row input {
+            width: auto;
+            margin: 0;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Submit Your Application</h1>
+        <p class="intro">Please fill out the form below to apply for a position at our company.</p>
+
+        <form action="#">
+            <label for="fullName">Full Name:</label>
+            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required minlength="3">
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required minlength="3">
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required minlength="10">
+
+            <label for="position">Position Applying For:</label>
+            <select id="position" name="position">
+                <option value="">Select a position</option>
+                <option value="frontend">Frontend Developer</option>
+                <option value="backend">Backend Developer</option>
+                <option value="designer">UI/UX Designer</option>
+                <option value="support">Customer Support</option>
+            </select>
+
+            <label for="experience">Years of Experience:</label>
+            <select id="experience" name="experience">
+                <option value="">Select years of experience</option>
+                <option value="0-1">0-1 years</option>
+                <option value="2-3">2-3 years</option>
+                <option value="4-5">4-5 years</option>
+                <option value="5+">5+ years</option>
+            </select>
+
+            <label for="message">Why do you want to join us?</label>
+            <textarea id="message" name="message" placeholder="Tell us about yourself and why you're interested in this position."></textarea>
+
+            <label class="checkbox-row">
+                <input type="checkbox" name="terms"> I agree to the terms and conditions.
+            </label>
+
+            <button type="submit">Submit Application</button>
+        </form>
+    </div>
+</body>
+</html>
