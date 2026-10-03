@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To Do List</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 20px;
+            background: #111111;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 28px;
+            background: #ffffff;
+            color: #111111;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        h1 {
+            margin: 0 0 22px;
+            color: #111111;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            min-width: 0;
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #777777;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus {
+            outline: 2px solid #777777;
+            border-color: #111111;
+        }
+
+        button {
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 6px;
+            color: #ffffff;
+            background: #111111;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #333333;
+        }
+
+        #cancelButton {
+            background: #555555;
+        }
+
+        .task-list {
+            display: grid;
+            gap: 10px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid #cccccc;
+            border-radius: 6px;
+        }
+
+        .task-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #111111;
+        }
+
+        .task-text {
+            min-width: 0;
+            flex: 1;
+            overflow-wrap: anywhere;
+        }
+
+        .task-item.completed .task-text {
+            color: #666666;
+            text-decoration: line-through;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .task-actions button {
+            padding: 7px 10px;
+            font-size: 14px;
+        }
+
+        .delete-button {
+            background: #111111;
+        }
+
+        .delete-button:hover {
+            background: #333333;
+        }
+
+        .empty-message {
+            padding: 18px;
+            color: #666666;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px 10px;
+            }
+
+            .container {
+                padding: 20px 14px;
+            }
+
+            .task-item {
+                flex-wrap: wrap;
+            }
+
+            .task-actions {
+                margin-left: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>To Do List</h1>
+
+        <form id="todoForm">
+            <input type="text" id="taskInput" placeholder="What needs to be done?" aria-label="Task" required />
+            <button type="submit" id="submitButton">Add Task</button>
+            <button type="button" id="cancelButton" hidden>Cancel</button>
+        </form>
+
+        <ul class="task-list" id="taskList" aria-live="polite"></ul>
+        <p class="empty-message" id="emptyMessage">No tasks yet. Add one above.</p>
+    </main>
+
+    <script>
+        const form = document.getElementById("todoForm");
+        const taskInput = document.getElementById("taskInput");
+        const taskList = document.getElementById("taskList");
+        const emptyMessage = document.getElementById("emptyMessage");
+        const submitButton = document.getElementById("submitButton");
+        const cancelButton = document.getElementById("cancelButton");
+        const storageKey = "exercise17-todos";
+
+        let tasks = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        let editingTaskId = null;
+
+        function saveTasks() {
+            localStorage.setItem(storageKey, JSON.stringify(tasks));
+        }
+
+        function renderTasks() {
+            taskList.replaceChildren();
+            emptyMessage.hidden = tasks.length > 0;
+
+            tasks.forEach((task) => {
+                const item = document.createElement("li");
+                item.className = "task-item";
+                item.classList.toggle("completed", task.completed);
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = task.completed;
+                checkbox.setAttribute("aria-label", `Mark ${task.text} as complete`);
+                checkbox.addEventListener("change", () => {
+                    task.completed = checkbox.checked;
+                    saveTasks();
+                    renderTasks();
+                });
+
+                const text = document.createElement("span");
+                text.className = "task-text";
+                text.textContent = task.text;
+
+                const actions = document.createElement("div");
+                actions.className = "task-actions";
+
+                const editButton = document.createElement("button");
+                editButton.type = "button";
+                editButton.textContent = "Edit";
+                editButton.addEventListener("click", () => {
+                    taskInput.value = task.text;
+                    editingTaskId = task.id;
+                    submitButton.textContent = "Update Task";
+                    cancelButton.hidden = false;
+                    taskInput.focus();
+                });
+
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.className = "delete-button";
+                deleteButton.textContent = "Delete";
+                deleteButton.addEventListener("click", () => {
+                    tasks = tasks.filter((currentTask) => currentTask.id !== task.id);
+                    if (editingTaskId === task.id) {
+                        resetForm();
+                    }
+                    saveTasks();
+                    renderTasks();
+                });
+
+                actions.append(editButton, deleteButton);
+                item.append(checkbox, text, actions);
+                taskList.append(item);
+            });
+        }
+
+        function resetForm() {
+            form.reset();
+            editingTaskId = null;
+            submitButton.textContent = "Add Task";
+            cancelButton.hidden = true;
+        }
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const text = taskInput.value.trim();
+            if (!text) return;
+
+            if (editingTaskId === null) {
+                tasks.push({ id: Date.now(), text, completed: false });
+            } else {
+                const task = tasks.find((currentTask) => currentTask.id === editingTaskId);
+                if (task) task.text = text;
+            }
+
+            saveTasks();
+            resetForm();
+            renderTasks();
+        });
+
+        cancelButton.addEventListener("click", resetForm);
+        renderTasks();
+    </script>
+</body>
+</html>
