@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Clock and Stopwatch</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			min-height: 100vh;
+			margin: 0;
+			padding: 32px 20px;
+			display: grid;
+			place-items: center;
+			background: #171717;
+			color: #ffffff;
+			font-family: "Segoe UI", sans-serif;
+		}
+
+		main {
+			width: min(100%, 900px);
+		}
+
+		h1 {
+			margin: 0 0 24px;
+			font-size: 28px;
+			text-align: center;
+		}
+
+		.tools {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 18px;
+		}
+
+		.panel {
+			min-height: 260px;
+			padding: 28px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			background: #ffffff;
+			color: #171717;
+			border-radius: 10px;
+		}
+
+		.panel h2 {
+			margin: 0 0 24px;
+			font-size: 18px;
+		}
+
+		.display {
+			font-variant-numeric: tabular-nums;
+			font-size: clamp(36px, 8vw, 58px);
+			font-weight: 600;
+		}
+
+		#clockDate {
+			margin-top: 10px;
+			color: #666666;
+			font-size: 16px;
+		}
+
+		.controls {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 8px;
+			margin-top: 24px;
+		}
+
+		button {
+			min-width: 86px;
+			padding: 10px 14px;
+			border: 1px solid #171717;
+			border-radius: 5px;
+			background: #171717;
+			color: #ffffff;
+			font-size: 15px;
+			cursor: pointer;
+		}
+
+		button:hover:not(:disabled) {
+			background: #444444;
+		}
+
+		button:focus-visible {
+			outline: 3px solid #888888;
+			outline-offset: 3px;
+		}
+
+		button:disabled {
+			background: #777777;
+			border-color: #777777;
+			cursor: not-allowed;
+		}
+
+		@media (max-width: 600px) {
+			body {
+				padding: 24px 14px;
+			}
+
+			.tools {
+				grid-template-columns: 1fr;
+			}
+
+			.panel {
+				min-height: 230px;
+				padding: 24px 16px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<h1>Clock and Stopwatch</h1>
+		<div class="tools">
+			<div class="panel" role="region" aria-labelledby="clockHeading">
+				<h2 id="clockHeading">Current Time</h2>
+				<div class="display" id="clockTime" role="timer">--:--:--</div>
+				<div id="clockDate"></div>
+			</div>
+
+			<div class="panel" role="region" aria-labelledby="stopwatchHeading">
+				<h2 id="stopwatchHeading">Stopwatch</h2>
+				<div class="display" id="stopwatchDisplay" role="timer" aria-live="off">00:00.00</div>
+				<div class="controls">
+					<button type="button" id="startButton">Start</button>
+					<button type="button" id="pauseButton" disabled>Pause</button>
+					<button type="button" id="resetButton">Reset</button>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		const clockTime = document.getElementById("clockTime");
+		const clockDate = document.getElementById("clockDate");
+		const stopwatchDisplay = document.getElementById("stopwatchDisplay");
+		const startButton = document.getElementById("startButton");
+		const pauseButton = document.getElementById("pauseButton");
+		const resetButton = document.getElementById("resetButton");
+
+		function updateClock() {
+			const now = new Date();
+			clockTime.textContent = now.toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit",
+				second: "2-digit"
+			});
+			clockDate.textContent = now.toLocaleDateString([], {
+				weekday: "long",
+				year: "numeric",
+				month: "long",
+				day: "numeric"
+			});
+		}
+
+		let elapsedMilliseconds = 0;
+		let startedAt = 0;
+		let stopwatchInterval = null;
+
+		function renderStopwatch() {
+			const currentElapsed = elapsedMilliseconds + (stopwatchInterval === null
+				? 0
+				: performance.now() - startedAt);
+			const totalCentiseconds = Math.floor(currentElapsed / 10);
+			const centiseconds = totalCentiseconds % 100;
+			const totalSeconds = Math.floor(totalCentiseconds / 100);
+			const seconds = totalSeconds % 60;
+			const minutes = Math.floor(totalSeconds / 60);
+
+			stopwatchDisplay.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(centiseconds).padStart(2, "0")}`;
+		}
+
+		startButton.addEventListener("click", () => {
+			if (stopwatchInterval !== null) return;
+			startedAt = performance.now();
+			stopwatchInterval = window.setInterval(renderStopwatch, 10);
+			startButton.disabled = true;
+			pauseButton.disabled = false;
+		});
+
+		pauseButton.addEventListener("click", () => {
+			if (stopwatchInterval === null) return;
+			elapsedMilliseconds += performance.now() - startedAt;
+			window.clearInterval(stopwatchInterval);
+			stopwatchInterval = null;
+			renderStopwatch();
+			startButton.disabled = false;
+			pauseButton.disabled = true;
+		});
+
+		resetButton.addEventListener("click", () => {
+			if (stopwatchInterval !== null) {
+				window.clearInterval(stopwatchInterval);
+				stopwatchInterval = null;
+			}
+			elapsedMilliseconds = 0;
+			startedAt = 0;
+			renderStopwatch();
+			startButton.disabled = false;
+			pauseButton.disabled = true;
+		});
+
+		updateClock();
+		window.setInterval(updateClock, 1000);
+	</script>
+</body>
+</html>
