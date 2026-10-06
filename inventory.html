@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory Management System</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f5f6;
+      color: #252a30;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+    }
+
+    main {
+      width: min(1100px, calc(100% - 32px));
+      margin: 28px auto;
+      padding-bottom: 68px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 25px;
+      font-weight: 600;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #626b74;
+    }
+
+    .statistics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      margin: 22px 0;
+      padding: 14px 16px;
+      border: 1px solid #d9dde1;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .statistics p {
+      margin: 0;
+      color: #454c53;
+    }
+
+    .statistics strong {
+      color: #252a30;
+      font-size: 16px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding: 18px;
+      border: 1px solid #d9dde1;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(110px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #41484f;
+    }
+
+    input,
+    select,
+    button {
+      min-height: 36px;
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid #cbd1d6;
+      border-radius: 3px;
+      background: #fff;
+      color: #252a30;
+    }
+
+    input:focus,
+    select:focus,
+    button:focus-visible {
+      outline: 2px solid #8bb7e5;
+      outline-offset: 1px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    button {
+      padding: 6px 11px;
+      border: 1px solid #cbd1d6;
+      border-radius: 3px;
+      background: #fff;
+      color: #30373d;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      background: #f0f3f5;
+    }
+
+    .primary-button {
+      border-color: #2866a4;
+      background: #2866a4;
+      color: #fff;
+    }
+
+    .primary-button:hover {
+      background: #205787;
+    }
+
+    .delete-button {
+      color: #8b3737;
+    }
+
+    .message {
+      min-height: 17px;
+      margin: 10px 0 0;
+      color: #2866a4;
+    }
+
+    .message.error {
+      color: #a13d3d;
+    }
+
+    .table-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .table-heading h2 {
+      margin: 0;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filters input {
+      width: 220px;
+    }
+
+    .filters select {
+      width: 160px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th,
+    td {
+      padding: 10px 9px;
+      border-bottom: 1px solid #e5e8ea;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #59626a;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .quantity-control,
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quantity-control button {
+      min-width: 28px;
+      min-height: 28px;
+      padding: 2px 6px;
+    }
+
+    .quantity-control button:disabled {
+      color: #a0a6ab;
+      cursor: not-allowed;
+    }
+
+    .quantity-value {
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .status-low {
+      color: #85631e;
+    }
+
+    .status-out {
+      color: #8b4545;
+    }
+
+    .empty-state td {
+      padding: 22px 10px;
+      color: #626b74;
+      text-align: center;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .contact-button {
+      position: fixed;
+      z-index: 5;
+      right: 24px;
+      bottom: 22px;
+      overflow: hidden;
+      min-height: 44px;
+      padding: 0 19px;
+      border: 1px solid #111;
+      border-radius: 3px;
+      background: #111;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      transition: transform 400ms ease, background-color 400ms ease;
+      isolation: isolate;
+    }
+
+    .contact-button::before {
+      position: absolute;
+      z-index: 0;
+      top: 50%;
+      left: 50%;
+      width: 180%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: #fff;
+      content: "";
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .contact-button span {
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      transition: transform 350ms ease, color 350ms ease;
+    }
+
+    .contact-button:hover:not(:disabled) {
+      transform: translate(var(--contact-x, 0px), var(--contact-y, 0px)) scale(1.04);
+      background: #111;
+    }
+
+    .contact-button:hover::before {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .contact-button:hover span {
+      color: #111;
+      transform: translateY(-1px);
+    }
+
+    .contact-button:focus-visible {
+      outline-color: #111;
+    }
+
+    .contact-close:focus-visible {
+      outline-color: #111;
+    }
+
+    .contact-modal {
+      position: fixed;
+      z-index: 10;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgb(0 0 0 / 35%);
+      opacity: 0;
+      transition: opacity 220ms ease;
+    }
+
+    .contact-modal.is-open {
+      opacity: 1;
+    }
+
+    .contact-dialog {
+      width: min(360px, 100%);
+      padding: 24px;
+      border: 1px solid #111;
+      border-radius: 4px;
+      background: #fff;
+      color: #111;
+      transform: scale(0.97);
+      transition: transform 220ms ease;
+    }
+
+    .contact-modal.is-open .contact-dialog {
+      transform: scale(1);
+    }
+
+    .contact-dialog h2 {
+      margin: 0 0 16px;
+    }
+
+    .contact-dialog p {
+      margin: 0 0 20px;
+    }
+
+    .contact-dialog a {
+      color: #111;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .contact-close {
+      border-color: #111;
+      background: #111;
+      color: #fff;
+    }
+
+    .contact-close:hover {
+      background: #333 !important;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: calc(100% - 24px);
+        margin: 20px auto;
+      }
+
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .table-heading {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .filters {
+        flex-direction: column;
+      }
+
+      .filters input,
+      .filters select {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .statistics {
+        gap: 12px 20px;
+        flex-direction: column;
+      }
+
+      .contact-button {
+        right: 14px;
+        bottom: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .contact-button,
+      .contact-button::before,
+      .contact-button span,
+      .contact-modal,
+      .contact-dialog {
+        transition-duration: 0.01ms;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Inventory Management System</h1>
+      <p class="subtitle">Manage products and stock</p>
+    </header>
+
+    <section class="statistics" aria-label="Inventory statistics">
+      <p>Total Products: <strong id="total-products">0</strong></p>
+      <p>Total Inventory Value: <strong id="total-value">₹0</strong></p>
+      <p>Low Stock: <strong id="low-stock">0</strong></p>
+    </section>
+
+    <section class="section" aria-labelledby="form-heading">
+      <h2 id="form-heading">Add Product</h2>
+      <form id="product-form" novalidate>
+        <div class="form-grid">
+          <label for="product-id">Product ID
+            <input id="product-id" type="text" maxlength="40" required>
+          </label>
+          <label for="product-name">Product Name
+            <input id="product-name" type="text" maxlength="100" required>
+          </label>
+          <label for="product-category">Category
+            <select id="product-category" required>
+              <option value="">Select category</option>
+              <option>Electronics</option>
+              <option>Clothing</option>
+              <option>Food</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label for="product-price">Price (₹)
+            <input id="product-price" type="number" min="0" step="any" required>
+          </label>
+          <label for="product-quantity">Quantity
+            <input id="product-quantity" type="number" min="0" step="1" required>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button id="submit-button" class="primary-button" type="submit">Add Product</button>
+          <button id="cancel-button" type="button" hidden>Cancel</button>
+        </div>
+      </form>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="section" aria-labelledby="products-heading">
+      <div class="table-heading">
+        <h2 id="products-heading">Products</h2>
+        <div class="filters">
+          <label hidden for="search-input">Search product</label>
+          <input id="search-input" type="search" placeholder="Search product..." autocomplete="off" aria-label="Search product">
+          <label hidden for="category-filter">Filter by category</label>
+          <select id="category-filter" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+            <option>Electronics</option>
+            <option>Clothing</option>
+            <option>Food</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Product</th>
+              <th scope="col">Category</th>
+              <th scope="col">Price</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Status</th>
+              <th scope="col">Value</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="product-list"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <button id="contact-button" class="contact-button" type="button" aria-haspopup="dialog" aria-controls="contact-modal">
+    <span>CONTACT</span>
+  </button>
+
+  <div id="contact-modal" class="contact-modal" role="presentation" hidden>
+    <section class="contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <h2 id="contact-title">Contact</h2>
+      <p>Email: <a href="mailto:your-email@example.com">your-email@example.com</a></p>
+      <button id="contact-close" class="contact-close" type="button">Close</button>
+    </section>
+  </div>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "inventoryProducts";
+    const categories = ["Electronics", "Clothing", "Food", "Other"];
+    const sampleProducts = [
+      { id: "P101", name: "Laptop", category: "Electronics", price: 50000, quantity: 7 },
+      { id: "P102", name: "T-Shirt", category: "Clothing", price: 600, quantity: 3 },
+      { id: "P103", name: "Notebook", category: "Other", price: 80, quantity: 0 }
+    ];
+
+    let products = [];
+    let editingId = null;
+
+    const form = document.getElementById("product-form");
+    const idInput = document.getElementById("product-id");
+    const nameInput = document.getElementById("product-name");
+    const categoryInput = document.getElementById("product-category");
+    const priceInput = document.getElementById("product-price");
+    const quantityInput = document.getElementById("product-quantity");
+    const submitButton = document.getElementById("submit-button");
+    const cancelButton = document.getElementById("cancel-button");
+    const formHeading = document.getElementById("form-heading");
+    const message = document.getElementById("message");
+    const productList = document.getElementById("product-list");
+    const searchInput = document.getElementById("search-input");
+    const categoryFilter = document.getElementById("category-filter");
+    const contactButton = document.getElementById("contact-button");
+    const contactModal = document.getElementById("contact-modal");
+    const contactClose = document.getElementById("contact-close");
+    let contactCloseTimer = null;
+
+    // Keep the magnetic movement restrained and return to center on pointer leave.
+    contactButton.addEventListener("mousemove", function (event) {
+      const bounds = contactButton.getBoundingClientRect();
+      const x = (event.clientX - bounds.left - bounds.width / 2) / (bounds.width / 2);
+      const y = (event.clientY - bounds.top - bounds.height / 2) / (bounds.height / 2);
+      contactButton.style.setProperty("--contact-x", (x * 6).toFixed(1) + "px");
+      contactButton.style.setProperty("--contact-y", (y * 6).toFixed(1) + "px");
+    });
+
+    contactButton.addEventListener("mouseleave", function () {
+      contactButton.style.setProperty("--contact-x", "0px");
+      contactButton.style.setProperty("--contact-y", "0px");
+    });
+
+    // The modal uses its open class for a short fade and scale transition.
+    contactButton.addEventListener("click", function () {
+      window.clearTimeout(contactCloseTimer);
+      contactModal.hidden = false;
+      requestAnimationFrame(function () {
+        contactModal.classList.add("is-open");
+      });
+      contactClose.focus();
+    });
+
+    function closeContactModal() {
+      contactModal.classList.remove("is-open");
+      contactCloseTimer = window.setTimeout(function () {
+        contactModal.hidden = true;
+        contactButton.focus();
+      }, 230);
+    }
+
+    contactClose.addEventListener("click", closeContactModal);
+
+    contactModal.addEventListener("click", function (event) {
+      if (event.target === contactModal) {
+        closeContactModal();
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && !contactModal.hidden) {
+        closeContactModal();
+      }
+    });
+
+    function showMessage(text, isError) {
+      message.textContent = text;
+      message.classList.toggle("error", Boolean(isError));
+    }
+
+    function isValidProduct(product) {
+      return product !== null
+        && typeof product === "object"
+        && typeof product.id === "string"
+        && product.id.trim() !== ""
+        && typeof product.name === "string"
+        && product.name.trim() !== ""
+        && categories.includes(product.category)
+        && Number.isFinite(product.price)
+        && product.price >= 0
+        && Number.isInteger(product.quantity)
+        && product.quantity >= 0;
+    }
+
+    function loadProducts() {
+      try {
+        const savedProducts = localStorage.getItem(STORAGE_KEY);
+        if (savedProducts === null) {
+          products = sampleProducts.map(function (product) {
+            return { ...product };
+          });
+          saveProducts();
+          return;
+        }
+
+        const parsedProducts = JSON.parse(savedProducts);
+        if (!Array.isArray(parsedProducts) || !parsedProducts.every(isValidProduct)) {
+          throw new Error("Saved product data is invalid.");
+        }
+        products = parsedProducts;
+      } catch (error) {
+        console.error("Could not load inventory from localStorage.", error);
+        products = sampleProducts.map(function (product) {
+          return { ...product };
+        });
+        showMessage("Saved data could not be read. Sample products were loaded.", true);
+      }
+    }
+
+    function saveProducts() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+        return true;
+      } catch (error) {
+        console.error("Could not save inventory to localStorage.", error);
+        showMessage("Changes could not be saved in localStorage.", true);
+        return false;
+      }
+    }
+
+    function formatRupees(amount) {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+
+    function getStatus(quantity) {
+      if (quantity === 0) {
+        return { text: "Out of Stock", className: "status-out" };
+      }
+      if (quantity < 5) {
+        return { text: "Low Stock", className: "status-low" };
+      }
+      return { text: "Available", className: "" };
+    }
+
+    function updateStatistics() {
+      document.getElementById("total-products").textContent = products.length;
+      document.getElementById("total-value").textContent = formatRupees(
+        products.reduce(function (total, product) {
+          return total + product.price * product.quantity;
+        }, 0)
+      );
+      document.getElementById("low-stock").textContent = products.filter(function (product) {
+        return product.quantity >= 1 && product.quantity <= 4;
+      }).length;
+    }
+
+    function filterProducts() {
+      const searchText = searchInput.value.trim().toLowerCase();
+      const selectedCategory = categoryFilter.value;
+
+      return products.filter(function (product) {
+        const matchesSearch = product.name.toLowerCase().includes(searchText)
+          || product.id.toLowerCase().includes(searchText);
+        const matchesCategory = selectedCategory === "all"
+          || product.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      });
+    }
+
+    function makeCell(text) {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      return cell;
+    }
+
+    function makeButton(text, action, productId, className, label) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = text;
+      button.dataset.action = action;
+      button.dataset.id = productId;
+      button.className = className || "";
+      button.setAttribute("aria-label", label);
+      return button;
+    }
+
+    function renderProducts() {
+      productList.replaceChildren();
+      const visibleProducts = filterProducts();
+
+      if (visibleProducts.length === 0) {
+        const row = document.createElement("tr");
+        row.className = "empty-state";
+        const cell = document.createElement("td");
+        cell.colSpan = 8;
+        cell.textContent = "No products found.";
+        row.appendChild(cell);
+        productList.appendChild(row);
+        return;
+      }
+
+      visibleProducts.forEach(function (product) {
+        const row = document.createElement("tr");
+        const status = getStatus(product.quantity);
+        row.append(
+          makeCell(product.id),
+          makeCell(product.name),
+          makeCell(product.category),
+          makeCell(formatRupees(product.price))
+        );
+
+        const quantityCell = document.createElement("td");
+        const quantityControl = document.createElement("div");
+        quantityControl.className = "quantity-control";
+        const decreaseButton = makeButton(
+          "−", "decrease", product.id, "", "Decrease " + product.name + " quantity"
+        );
+        decreaseButton.disabled = product.quantity === 0;
+        const quantityText = document.createElement("span");
+        quantityText.className = "quantity-value";
+        quantityText.textContent = product.quantity;
+        const increaseButton = makeButton(
+          "+", "increase", product.id, "", "Increase " + product.name + " quantity"
+        );
+        quantityControl.append(decreaseButton, quantityText, increaseButton);
+        quantityCell.appendChild(quantityControl);
+        row.appendChild(quantityCell);
+
+        const statusCell = document.createElement("td");
+        const statusText = document.createElement("span");
+        statusText.textContent = status.text;
+        statusText.className = status.className;
+        statusCell.appendChild(statusText);
+        row.append(statusCell, makeCell(formatRupees(product.price * product.quantity)));
+
+        const actionsCell = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "row-actions";
+        actions.append(
+          makeButton("Edit", "edit", product.id, "", "Edit " + product.name),
+          makeButton("Delete", "delete", product.id, "delete-button", "Delete " + product.name)
+        );
+        actionsCell.appendChild(actions);
+        row.appendChild(actionsCell);
+        productList.appendChild(row);
+      });
+    }
+
+    function resetForm() {
+      form.reset();
+      editingId = null;
+      submitButton.textContent = "Add Product";
+      formHeading.textContent = "Add Product";
+      cancelButton.hidden = true;
+    }
+
+    function editProduct(productId) {
+      const product = products.find(function (item) {
+        return item.id === productId;
+      });
+      if (!product) {
+        showMessage("Product not found.", true);
+        return;
+      }
+
+      editingId = product.id;
+      idInput.value = product.id;
+      nameInput.value = product.name;
+      categoryInput.value = product.category;
+      priceInput.value = product.price;
+      quantityInput.value = product.quantity;
+      submitButton.textContent = "Update Product";
+      formHeading.textContent = "Edit Product";
+      cancelButton.hidden = false;
+      showMessage("", false);
+      idInput.focus();
+    }
+
+    function deleteProduct(productId) {
+      const product = products.find(function (item) {
+        return item.id === productId;
+      });
+      if (!product || !window.confirm("Are you sure you want to delete this product?")) {
+        return;
+      }
+
+      products = products.filter(function (item) {
+        return item.id !== productId;
+      });
+      if (editingId === productId) {
+        resetForm();
+      }
+      saveProducts();
+      renderProducts();
+      updateStatistics();
+      showMessage("Product deleted.", false);
+    }
+
+    function updateQuantity(productId, change) {
+      const product = products.find(function (item) {
+        return item.id === productId;
+      });
+      if (!product || product.quantity + change < 0) {
+        return;
+      }
+
+      product.quantity += change;
+      saveProducts();
+      renderProducts();
+      updateStatistics();
+    }
+
+    function addProduct(product) {
+      products.push(product);
+      saveProducts();
+      renderProducts();
+      updateStatistics();
+    }
+
+    function getFormProduct() {
+      return {
+        id: idInput.value.trim(),
+        name: nameInput.value.trim(),
+        category: categoryInput.value,
+        price: priceInput.value.trim() === "" ? NaN : Number(priceInput.value),
+        quantity: quantityInput.value.trim() === "" ? NaN : Number(quantityInput.value)
+      };
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      showMessage("", false);
+      const product = getFormProduct();
+
+      if (!product.id || !product.name) {
+        showMessage("Product ID and product name are required.", true);
+        return;
+      }
+      if (!categories.includes(product.category)) {
+        showMessage("Please select a category.", true);
+        return;
+      }
+      if (!Number.isFinite(product.price) || product.price < 0) {
+        showMessage("Enter a valid price of zero or more.", true);
+        return;
+      }
+      if (!Number.isInteger(product.quantity) || product.quantity < 0) {
+        showMessage("Enter a whole-number quantity of zero or more.", true);
+        return;
+      }
+
+      const duplicateId = products.some(function (item) {
+        return item.id.toLowerCase() === product.id.toLowerCase()
+          && item.id !== editingId;
+      });
+      if (duplicateId) {
+        showMessage("Product ID must be unique.", true);
+        return;
+      }
+
+      if (editingId !== null) {
+        const index = products.findIndex(function (item) {
+          return item.id === editingId;
+        });
+        if (index === -1) {
+          showMessage("Product not found. Cancel and try again.", true);
+          return;
+        }
+        products[index] = product;
+        saveProducts();
+        renderProducts();
+        updateStatistics();
+        showMessage("Product updated.", false);
+      } else {
+        addProduct(product);
+        showMessage("Product added.", false);
+      }
+
+      resetForm();
+    });
+
+    cancelButton.addEventListener("click", function () {
+      resetForm();
+      showMessage("Editing cancelled.", false);
+    });
+
+    searchInput.addEventListener("input", renderProducts);
+    categoryFilter.addEventListener("change", renderProducts);
+
+    productList.addEventListener("click", function (event) {
+      const button = event.target.closest("button[data-action]");
+      if (!button) {
+        return;
+      }
+
+      const productId = button.dataset.id;
+      if (button.dataset.action === "increase") {
+        updateQuantity(productId, 1);
+      } else if (button.dataset.action === "decrease") {
+        updateQuantity(productId, -1);
+      } else if (button.dataset.action === "edit") {
+        editProduct(productId);
+      } else if (button.dataset.action === "delete") {
+        deleteProduct(productId);
+      }
+    });
+
+    loadProducts();
+    renderProducts();
+    updateStatistics();
+  </script>
+</body>
+</html>
