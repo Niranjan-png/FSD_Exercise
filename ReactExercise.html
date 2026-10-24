@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(ellipse at 15% 15%, #ffe5bd 0, transparent 38%),
+        radial-gradient(ellipse at 85% 85%, #f4c9a8 0, transparent 42%),
+        linear-gradient(135deg, #fff9ec, #f5e5d4 55%, #e8d8cb);
+      color: #26313a;
+      font-family: system-ui, sans-serif;
+    }
+    main { width: min(90vw, 420px); text-align: center; }
+    .sky {
+      height: 260px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      background: linear-gradient(#17263a, #40536a);
+      transition: background 1.2s ease;
+    }
+    .sky.risen { background: linear-gradient(#ffb77a, #f8d6a1 72%, #e7a276); }
+    .sun {
+      width: 92px;
+      height: 92px;
+      position: absolute;
+      left: 50%;
+      bottom: 18%;
+      border-radius: 50%;
+      background: #fff0b0;
+      box-shadow: 0 0 48px 14px #ffd27b80;
+      transform: translate(-50%, 150px);
+      transition: transform 1.5s cubic-bezier(.2,.8,.2,1);
+    }
+    .risen .sun { transform: translate(-50%, 0); }
+    .horizon {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 22%;
+      background: #34453e;
+      clip-path: polygon(0 35%, 18% 20%, 35% 42%, 54% 12%, 72% 38%, 88% 17%, 100% 32%, 100% 100%, 0 100%);
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 999px;
+      background: #26313a;
+      color: white;
+      font: inherit;
+      cursor: pointer;
+    }
+    button:focus-visible { outline: 3px solid #eea45d; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    function App() {
+      const [risen, setRisen] = React.useState(false);
+
+      return (
+        <main>
+          <div className={`sky ${risen ? "risen" : ""}`} aria-label={risen ? "Sunrise" : "Night sky"}>
+            <div className="sun" />
+            <div className="horizon" />
+          </div>
+          <button onClick={() => setRisen(true)} disabled={risen}>
+            {risen ? "Good morning" : "Show sunrise"}
+          </button>
+        </main>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
