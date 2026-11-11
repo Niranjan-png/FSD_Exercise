@@ -1,0 +1,3 @@
+Node.js streams are powerful.
+They process data in smaller chunks.
+This saves memory when handling large files.
